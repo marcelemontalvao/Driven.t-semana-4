@@ -1,3 +1,4 @@
+import httpStatus from 'http-status';
 import enrollmentRepository from '@/repositories/enrollment-repository';
 import { invalidDataError, notFoundError } from '@/errors';
 import bookingRepository from '@/repositories/booking-repository';
@@ -19,24 +20,26 @@ async function getBooking(userId: number) {
 
 async function postBookingRoom(userId: number, roomId: number) {
   const enrollment = await enrollmentRepository.findWithAddressByUserId(userId);
-  const room = await bookingRepository.findRoomById(roomId);
-  const bookings = await bookingRepository.findBookingsByRoomId(roomId);
-  const booking = await bookingRepository.createBooking(userId, roomId);
 
   if (!enrollment) {
     throw notFoundError();
   }
   const ticket = await ticketsRepository.findTicketByEnrollmentId(enrollment.id);
-
   if (!ticket || !ticket.TicketType.includesHotel || ticket.TicketType.isRemote || ticket.status === 'RESERVED') {
+    throw httpStatus.FORBIDDEN;
+  }
+
+  const room = await bookingRepository.findRoomById(roomId);
+  if (!room) {
     throw notFoundError();
   }
+  const bookings = await bookingRepository.findBookingsByRoomId(roomId);
 
-  if (bookings.length >= room.capacity) {
-    throw invalidDataError;
+  if (room.capacity <= bookings.length) {
+    throw httpStatus.FORBIDDEN;
   }
 
-  return booking;
+  return bookingRepository.createBooking(userId, roomId);
 }
 
 export default {
