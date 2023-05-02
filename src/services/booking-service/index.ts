@@ -44,7 +44,10 @@ async function postBookingRoom(userId: number, roomId: number) {
 }
 
 async function updateBooking(userId: number, roomId: number) {
-  const booking = await getBookingGenerals(userId);
+  const booking = await bookingRepository.findBookingByUserId(userId);
+  if (!booking) {
+    throw httpStatus.FORBIDDEN;
+  }
   await validations(userId, roomId);
   return bookingRepository.updateBooking(booking.id, userId, roomId);
 }
