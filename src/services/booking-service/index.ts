@@ -33,7 +33,30 @@ async function postBookingRoom(userId: number, roomId: number) {
   return bookingRepository.createBooking(userId, roomId);
 }
 
+async function updateBooking(userId: number, roomId: number) {
+  const enrollment = await enrollmentRepository.findWithAddressByUserId(userId);
+  const ticket = await ticketsRepository.findTicketByEnrollmentId(enrollment.id);
+  if (!ticket || !ticket.TicketType.includesHotel || ticket.TicketType.isRemote || ticket.status === 'RESERVED') {
+    throw httpStatus.FORBIDDEN;
+  }
+  const room = await bookingRepository.findRoomById(roomId);
+  if (!room || !enrollment) {
+    throw notFoundError();
+  }
+  const bookings = await bookingRepository.findBookingsByRoomId(roomId);
+  if (room.capacity <= bookings.length) {
+    throw httpStatus.FORBIDDEN;
+  }
+  const booking = await bookingRepository.findBookingByUserId(userId);
+  if (!booking) {
+    throw notFoundError();
+  }
+
+  return bookingRepository.updateBooking(booking.id, userId, roomId);
+}
+
 export default {
   getBooking,
   postBookingRoom,
+  updateBooking,
 };

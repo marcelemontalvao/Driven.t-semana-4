@@ -45,3 +45,30 @@ export async function postBookingRoom(req: AuthenticatedRequest, res: Response, 
     }
   }
 }
+
+export async function putBooking(req: AuthenticatedRequest, res: Response, next: NextFunction) {
+  const { userId } = req;
+  const { roomId } = req.body;
+
+  if (!roomId) {
+    return res.status(400).sendStatus(httpStatus.BAD_REQUEST);
+  }
+  try {
+    const booking = await bookingService.updateBooking(userId, roomId);
+
+    if (!booking) {
+      throw notFoundError();
+    }
+    return res.status(httpStatus.OK).send({
+      bookingId: booking.id,
+    });
+  } catch (error) {
+    if (error.name === 'NotFoundError') {
+      return res.status(404).sendStatus(httpStatus.NOT_FOUND);
+    } else if (error == httpStatus.BAD_REQUEST) {
+      return res.status(400).sendStatus(httpStatus.BAD_REQUEST);
+    } else {
+      return res.status(403).sendStatus(httpStatus.FORBIDDEN);
+    }
+  }
+}
