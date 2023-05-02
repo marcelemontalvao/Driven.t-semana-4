@@ -6,7 +6,6 @@ import { notFoundError } from '@/errors';
 
 export async function getBooking(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   const { userId } = req;
-
   try {
     const booking = await bookingService.getBooking(userId);
     return res.status(httpStatus.OK).send({
@@ -21,17 +20,14 @@ export async function getBooking(req: AuthenticatedRequest, res: Response, next:
 export async function postBookingRoom(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   const { userId } = req;
   const { roomId } = req.body;
-
   if (!roomId) {
     return res.status(400).sendStatus(httpStatus.BAD_REQUEST);
   }
   try {
     const booking = await bookingService.postBookingRoom(userId, roomId);
-
     if (!booking) {
       throw notFoundError();
     }
-
     return res.status(httpStatus.OK).send({
       bookingId: booking.id,
     });
@@ -49,13 +45,11 @@ export async function postBookingRoom(req: AuthenticatedRequest, res: Response, 
 export async function putBooking(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   const { userId } = req;
   const { roomId } = req.body;
-
   if (!roomId) {
     return res.status(400).sendStatus(httpStatus.BAD_REQUEST);
   }
   try {
     const booking = await bookingService.updateBooking(userId, roomId);
-
     if (!booking) {
       throw notFoundError();
     }
