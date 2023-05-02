@@ -32,9 +32,10 @@ export async function postBookingRoom(req: AuthenticatedRequest, res: Response, 
       throw notFoundError();
     }
 
-    return res.status(httpStatus.OK).send(booking);
+    return res.status(httpStatus.OK).send({
+      bookingId: booking.id,
+    });
   } catch (error) {
-    console.log(error);
     if (error.name === 'NotFoundError') {
       return res.status(404).sendStatus(httpStatus.NOT_FOUND);
     } else if (error == httpStatus.BAD_REQUEST) {

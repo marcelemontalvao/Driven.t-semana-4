@@ -165,14 +165,14 @@ describe('POST /booking', () => {
       const payment = await createPayment(ticket.id, ticketType.price);
 
       const hotel = await createHotel();
-      const room = await createRoomWithHotelId(hotel.id);
+      const createdroom = await createRoomWithHotelId(hotel.id);
 
       const validBody = createValidBody();
       const response = await server
         .post('/booking')
         .set('Authorization', `Bearer ${token}`)
         .send({
-          roomId: room.id + 1,
+          roomId: createdroom.id + 2,
         });
 
       expect(response.status).toEqual(httpStatus.NOT_FOUND);
