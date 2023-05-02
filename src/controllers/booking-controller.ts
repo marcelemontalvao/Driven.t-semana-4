@@ -4,6 +4,16 @@ import { AuthenticatedRequest } from '@/middlewares';
 import bookingService from '@/services/booking-service';
 import { notFoundError } from '@/errors';
 
+function catchErrors(error: any, res: Response) {
+  if (error.name === 'NotFoundError') {
+    return res.status(404).sendStatus(httpStatus.NOT_FOUND);
+  } else if (error == httpStatus.BAD_REQUEST) {
+    return res.status(400).sendStatus(httpStatus.BAD_REQUEST);
+  } else {
+    return res.status(403).sendStatus(httpStatus.FORBIDDEN);
+  }
+}
+
 export async function getBooking(req: AuthenticatedRequest, res: Response, next: NextFunction) {
   const { userId } = req;
   try {
@@ -32,13 +42,7 @@ export async function postBookingRoom(req: AuthenticatedRequest, res: Response, 
       bookingId: booking.id,
     });
   } catch (error) {
-    if (error.name === 'NotFoundError') {
-      return res.status(404).sendStatus(httpStatus.NOT_FOUND);
-    } else if (error == httpStatus.BAD_REQUEST) {
-      return res.status(400).sendStatus(httpStatus.BAD_REQUEST);
-    } else {
-      return res.status(403).sendStatus(httpStatus.FORBIDDEN);
-    }
+    catchErrors(error, res);
   }
 }
 
@@ -57,12 +61,6 @@ export async function putBooking(req: AuthenticatedRequest, res: Response, next:
       bookingId: booking.id,
     });
   } catch (error) {
-    if (error.name === 'NotFoundError') {
-      return res.status(404).sendStatus(httpStatus.NOT_FOUND);
-    } else if (error == httpStatus.BAD_REQUEST) {
-      return res.status(400).sendStatus(httpStatus.BAD_REQUEST);
-    } else {
-      return res.status(403).sendStatus(httpStatus.FORBIDDEN);
-    }
+    catchErrors(error, res);
   }
 }
